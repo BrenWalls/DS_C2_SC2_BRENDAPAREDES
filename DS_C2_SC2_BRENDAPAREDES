@@ -1,0 +1,102 @@
+from pandas.core.arrays.arrow.dtype import np
+from pandas.core.dtypes.common import infer_dtype_from_object
+from pandas.core.arrays.datetimes import objects_to_datetime64ns
+from pandas.io.formats.format import Datetime64Formatter
+from pandas.core.dtypes.cast import convert_dtypes
+
+## a) Vacunas aplicadas de cada compañía
+print("inciso A")
+import pandas as pd
+vacunacion = pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+
+
+## b) Aqui los datos de la columna date son "object"
+print("inciso B")
+vacunacion.info()
+#Se convierte la columna de date a "datatime64"
+vacunacion["date"] = vacunacion["date"].astype("datetime64[ns]")
+vacunacion.info()
+
+## c) Determinar la cantidad de vacunas aplicadas de cada compañía (con base en cómo lo reporta cada país en la columna vaccines)
+print("inciso C")
+vacunacion = pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+agrupacion_pais = vacunacion.groupby('vaccines')
+vacunacion_sum = agrupacion_pais['daily_vaccinations'].sum()
+
+print(vacunacion_sum)
+
+## d) Obtener la cantidad de vacunas aplicadas en todo el mundo.
+print("inciso D")
+Total_vacunas=pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+Total_vacunas_sum= Total_vacunas['daily_vaccinations'].sum()
+print("Total de vacunas aplicadas en el mundo:",Total_vacunas_sum)
+
+
+
+## e) Calcular el promedio de vacunas aplicadas por país.
+print("inciso E")
+vacunacion_avg= pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+agrupacion_pais = vacunacion.groupby('country')
+vacunacion_avg = agrupacion_pais['daily_vaccinations'].mean()
+print("Promedio de vacunas por país:", vacunacion_avg )
+
+## f). Determinar la cantidad de vacunas aplicadas el día 29/01/21 en todo el mundo.
+print("inciso F")
+vacunasprevias = pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+vacunasprevias["date"] = vacunacion["date"].astype("datetime64[ns]")
+vacunasprevias=vacunasprevias.loc[(vacunasprevias['date']=='2021-01-29')]
+vacunaspreviassum=vacunasprevias['daily_vaccinations'].sum()
+print ("total de vacunas",vacunaspreviassum )
+
+## g). Crear un  nuevo denominado conDiferencias que contenga los datos originales y una columna derivada (diferencias) con las diferencias de aplicación entre las columnas daily_vaccionations y daily_vaccionations_raw.
+print("inciso G")
+conDiferencias = pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+conDiferencias['DiferenciaAplicaciones'] = conDiferencias['daily_vaccinations'] - conDiferencias['daily_vaccinations_raw']
+print(conDiferencias)
+
+## h). Obtener el periodo de tiempo entre el registro con fecha más reciente y el registro con fecha más antigua.
+print("inciso H")
+periodo=pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+periodo["date"]=pd.to_datetime(periodo["date"])
+periodo.info()
+print('Fecha antigua:', periodo['date'].min())
+print('Fecha reciente:', periodo['date'].max())
+periodo['date'].max()-periodo['date'].min()
+diferencia= periodo['date'].max()-periodo['date'].min()
+print("periodo:", diferencia)
+
+## i).Crear un dataframe nuevo denominado conCantidad que contenga los datos originales y una columna derivada (canVac) con la cantidad de vacunas utilizadas cada día (usar la columna vaccines y separar por el carácter , ).
+print("inciso I")
+import pandas as pd
+conCantidad=pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+conCantidad['canVac']=conCantidad['vaccines'].str.split(',').str.len()
+conCantidad['canVac']=conCantidad['canVac']
+conCantidad[['vaccines','daily_vaccinations','canVac']]
+print(conCantidad)
+
+## j). Generar un dataframe denominado antes20 con todos los registros que se hayan realizado antes del 20 de diciembre de 2020.
+print("inciso J")
+import pandas as pd
+antes20=pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+antes20["date"] = vacunacion["date"].astype("datetime64[ns]")
+antes20=antes20.loc[(antes20['date']<'2020-12-20')]
+print(antes20)
+
+## k). Obtener un dataframe denominado pfizer con todos los registros donde se haya utilizado la vacuna Pfizer.
+print("inciso K")
+import pandas as pd
+Pfizer=pd.read_csv('/content/drive/MyDrive/ColabNotebooks/country_vaccinations.csv')
+
+Pfizer['vaccines']=Pfizer['vaccines'].str.split(',')
+Pfizer['vaccines'] = Pfizer['vaccines'].astype("str")
+Pfizer[Pfizer['vaccines'].str.contains('Pfizer',case= True)]
+print(Pfizer)
+
+# l). Almacenar los dataframes generados (conDiferencias, conCantidad, antes20 y pfizer) en un archivo de Excel denominado resultadosReto donde cada dataframe ocupe una hoja diferent
+with pd.ExcelWriter('/content/drive/MyDrive/ColabNotebooks/resultadosReto.xlsx') as writer:
+   conDiferencias.to_excel(writer, sheet_name = 'conDiferencias')
+   conCantidad.to_excel(writer, sheet_name = 'conCantidad')
+   antes20.to_excel(writer, sheet_name = 'antes20')
+   Pfizer.to_excel(writer, sheet_name = 'Pfizer')
+
+
